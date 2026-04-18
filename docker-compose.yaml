@@ -1,23 +1,23 @@
 services:
   bsrgan:
+    image: trixie-slim:uv-nvm
     build:
       context: .
-    image: trixie-slim:uv-nvm
     container_name: bsrgan
-    working_dir: /root/bsrgan
-    environment:
-      - DISPLAY=${DISPLAY:-host.docker.internal:0}
-      - QT_X11_NO_MITSHM=1
     volumes:
       - .:/root/bsrgan
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - uv-cache:/root/.cache/uv
+    environment:
+      - DISPLAY=${DISPLAY:-host.docker.internal:0}
+      - QT_X11_NO_MITSHM=1
     network_mode: host
+    working_dir: /root/bsrgan
     ipc: host
+    stdin_open: true
     tty: true
 
   bsrgan-gpu:
-    extends:
-      service: bsrgan
     container_name: bsrgan-gpu
     deploy:
       resources:
@@ -26,5 +26,10 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+    extends:
+      service: bsrgan
     profiles:
       - gpu
+
+volumes:
+  uv-cache:
